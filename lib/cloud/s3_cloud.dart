@@ -1,6 +1,5 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
-import 'package:path/path.dart' as path;
 import 'package:aws_s3_api/s3-2006-03-01.dart';
 import 'cloud.dart';
 
@@ -43,9 +42,10 @@ class S3Cloud implements Cloud {
   }
 
   String _getKey(String filePath) {
-    // Build key using POSIX path separator, without leading slash
-    // Using standard 'repo' prefix for consistency
-    return path.posix.join('repo', filePath);
+    // Build key using POSIX path separator, remove leading slashes
+    // The filePath already contains any necessary prefix (remotePath) from Repo class
+    final cleanPath = filePath.replaceAll(RegExp(r'^/+'), '');
+    return cleanPath;
   }
 
   @override
@@ -122,8 +122,8 @@ class S3Cloud implements Cloud {
 
   @override
   Future<Map<String, int>> listObjects(String prefix) async {
-    // Build full prefix for S3
-    final fullPrefix = prefix.isEmpty ? 'repo/' : 'repo/$prefix';
+    // Use the prefix as-is (already contains remotePath if needed)
+    final fullPrefix = prefix;
 
     try {
       final objects = <String, int>{};
@@ -143,12 +143,8 @@ class S3Cloud implements Cloud {
         if (response.contents != null) {
           for (final obj in response.contents!) {
             if (obj.key != null) {
-              // Remove 'repo/' prefix to get relative path
-              var relativePath = obj.key!;
-              if (relativePath.startsWith('repo/')) {
-                relativePath = relativePath.substring(5);
-              }
-              objects[relativePath] = obj.size ?? 0;
+              // Use the key as-is, Repo class will handle prefix removal
+              objects[obj.key!] = obj.size ?? 0;
             }
           }
         }

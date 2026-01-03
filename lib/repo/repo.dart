@@ -793,16 +793,25 @@ class Repo {
 
     try {
       // List with remote path prefix to get all objects under the remote directory
-      final prefix = remotePath.isEmpty ? '' : remotePath;
+      final prefix = _cloudPath('');
       final allObjects = await cloud!.listObjects(prefix);
 
       allObjects.forEach((key, value) {
-        // Remove remote path prefix for local comparison
-        final localKey = remotePath.isEmpty
-            ? key
-            : key.startsWith('$remotePath/')
-                ? key.substring(remotePath.length + 1)
-                : key;
+        // The key from S3 already contains the full path with remotePath prefix
+        // We need to remove the prefix to get the local path for comparison
+        var localKey = key;
+        if (remotePath.isNotEmpty) {
+          final prefixWithSlash =
+              remotePath.endsWith('/') ? remotePath : '$remotePath/';
+          if (key.startsWith(prefixWithSlash)) {
+            localKey = key.substring(prefixWithSlash.length);
+          } else if (key.startsWith(remotePath)) {
+            localKey = key.substring(remotePath.length);
+            if (localKey.startsWith('/')) {
+              localKey = localKey.substring(1);
+            }
+          }
+        }
         objects[localKey] = true;
       });
 
