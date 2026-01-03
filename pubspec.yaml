@@ -1,0 +1,22 @@
+name: flow_repo
+description: A Dart implementation of dejavu - data snapshot and sync with chunking, deduplication, compression, and encryption.
+version: 1.0.0
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  crypto: ^3.0.3
+  pointycastle: ^3.7.3
+  path: ^1.8.3
+  http: ^1.1.0
+  xml: ^6.3.0
+  args: ^2.4.0
+  dotenv: ^4.0.0
+  aws_s3_api: ^2.0.0
+  archive: ^3.4.0
+  ffi: ^2.0.0
+
+dev_dependencies:
+  test: ^1.24.0
+  lints: ^3.0.0
+

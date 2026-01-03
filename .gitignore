@@ -1,0 +1,28 @@
+# Dart 相关
+.dart_tool/
+.packages
+.pub/
+pubspec.lock
+build/
+*.iml
+.idea/
+*.log
+
+# 环境变量和配置
+.env
+*.env
+
+# 仓库和测试数据
+.flow-repo/
+.flow-repo-*/
+*.tmp
+
+# 测试文件
+*_test.md
+INCREMENTAL_*.md
+test_*.dart
+
+# macOS
+.DS_Store
+
+/.cursorrules
