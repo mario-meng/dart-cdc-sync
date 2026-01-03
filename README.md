@@ -22,13 +22,24 @@
 - **🔐 End-to-End Encryption**: AES-256 encryption ensures zero-knowledge cloud storage
 - **📦 Content Deduplication**: SHA-1 based content addressing for automatic deduplication
 - **🔄 Incremental Sync**: Smart change detection with 98%+ bandwidth savings
-- **☁️ Cloud Storage**: S3-compatible storage support (Alibaba Cloud OSS, AWS S3, etc.)
+- **☁️ Cloud Storage**: S3-compatible storage support (AWS S3, Qiniu Cloud, Alibaba Cloud OSS)
+- **💰 Zero Server Cost**: No server-side computation or database required - only uses cheap object storage (S3/OSS), making it the most cost-effective and efficient universal sync solution
 
 ### Why Flow Repo?
 
 Unlike traditional fixed-size chunking, CDC determines chunk boundaries based on data content rather than fixed positions. This means when you insert or delete data in the middle of a file, only the affected chunks need to be re-synced, not the entire file. Flow Repo makes this powerful algorithm accessible to the Dart/Flutter ecosystem through a clean FFI interface.
 
 **Perfect for**: Flutter apps requiring efficient data backup, multi-device sync, or cloud storage with minimal bandwidth usage.
+
+### 💰 Zero Server Cost Architecture
+
+**Flow Repo requires no server-side computation or database storage** - it only uses cheap object storage services (S3/OSS). This makes it the **most cost-effective and efficient universal sync solution**:
+
+- **No Server Required**: All computation happens on the client side
+- **No Database Needed**: Metadata is stored in the object storage itself
+- **Ultra-Low Cost**: Only pay for object storage (typically $0.023/GB/month for S3)
+- **Universal Compatibility**: Works with any S3-compatible storage provider
+- **Maximum Efficiency**: Direct object storage access, no intermediate layers
 
 ---
 
@@ -193,41 +204,57 @@ cd ..
 
 ### Configuration
 
-Create a `.env` file:
+Copy `.env.demo` to `.env` and update with your actual values:
+
+```bash
+cp .env.demo .env
+# Then edit .env with your actual configuration
+```
+
+The `.env` file should contain:
 
 ```env
 # Encryption key (32 bytes)
 AES_KEY=your_32_byte_aes_key_here_12345
 
-# Alibaba Cloud OSS configuration (or AWS S3)
-OSS_ACCESS_KEY_ID=your_access_key
-OSS_ACCESS_KEY_SECRET=your_secret_key
-OSS_BUCKET_NAME=your_bucket_name
-OSS_ENDPOINT=oss-cn-shenzhen.aliyuncs.com
-OSS_REGION=oss-cn-shenzhen
+# S3-compatible cloud storage (required for sync)
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+S3_BUCKET=your_bucket_name
+S3_ENDPOINT=s3.amazonaws.com
+S3_REGION=us-east-1
 ```
 
+**Cloud Storage Compatibility**:
+- ✅ **AWS S3** - Fully supported, recommended
+- ✅ **Qiniu Cloud** - Fully supported, recommended
+- ⚠️ **Alibaba Cloud OSS** - Supported but slower sync (does not support ListObjects, requires traversing all objects)
+
+**Note**: Alibaba Cloud OSS lacks ListObjects support, which means sync operations need to traverse all objects, resulting in slower performance. We recommend using AWS S3 or Qiniu Cloud for better performance.
+
 ### Simple Usage
+
+**Note**: All paths (`data-path`, `repo-path`, `remote-path`) must be specified by the user.
 
 #### Create Index
 
 ```bash
 # Create a snapshot index
-dart run bin/main.dart index -d ./data --memo "Initial backup"
+dart run bin/main.dart index -d ./data -r ./.flow-repo -p remote/path --memo "Initial backup"
 ```
 
 #### Sync to Cloud
 
 ```bash
 # Sync to cloud (automatically detects upload/download direction)
-dart run bin/main.dart sync -d ./data
+dart run bin/main.dart sync -d ./data -r ./.flow-repo -p remote/path
 ```
 
 #### Sync to Another Device
 
 ```bash
 # Sync to a new device (use different local repo path)
-dart run bin/main.dart sync -d ./data-device2 -r ./.flow-repo-device2
+dart run bin/main.dart sync -d ./data-device2 -r ./.flow-repo-device2 -p remote/path
 ```
 
 ### Programmatic Usage
@@ -248,11 +275,11 @@ void main() async {
   
   // Configure cloud storage (optional, only needed for sync)
   final cloud = S3Cloud(
-    endpoint: 'https://your-bucket.oss-cn-shenzhen.aliyuncs.com',
-    accessKey: env['OSS_ACCESS_KEY_ID']!,
-    secretKey: env['OSS_ACCESS_KEY_SECRET']!,
-    bucket: env['OSS_BUCKET_NAME']!,
-    region: env['OSS_REGION']!,
+    endpoint: 'https://s3.amazonaws.com',
+    accessKey: env['AWS_ACCESS_KEY_ID']!,
+    secretKey: env['AWS_SECRET_ACCESS_KEY']!,
+    bucket: env['S3_BUCKET']!,
+    region: env['S3_REGION']!,
     availableSize: 100 * 1024 * 1024 * 1024, // 100GB
   );
   
@@ -265,6 +292,7 @@ void main() async {
     deviceOS: Platform.operatingSystem,
     aesKey: aesKey,
     cloud: cloud,
+    remotePath: 'remote/path', // Remote storage path
   );
   
   // Create index

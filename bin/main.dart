@@ -43,6 +43,14 @@ void main(List<String> args) async {
   }
 
   // Load environment variables from .env file
+  final envFile = File('.env');
+  if (!await envFile.exists()) {
+    print('Error: .env file not found');
+    print('Please copy .env.demo to .env and update with your configuration:');
+    print('  cp .env.demo .env');
+    print('  # Then edit .env with your actual values');
+    exit(1);
+  }
   final env = DotEnv(includePlatformEnvironment: true)..load(['.env']);
 
   // Get configuration from command line

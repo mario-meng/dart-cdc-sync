@@ -22,13 +22,24 @@
 - **🔐 端到端加密**: AES-256 加密确保云端零知识存储
 - **📦 内容去重**: 基于 SHA-1 的内容寻址，自动去重
 - **🔄 增量同步**: 智能变化检测，实现 98%+ 流量节省
-- **☁️ 云存储**: S3 兼容存储支持（阿里云 OSS、AWS S3 等）
+- **☁️ 云存储**: S3 兼容存储支持（AWS S3、七牛云、阿里云 OSS）
+- **💰 零服务器成本**: 无需服务器端计算和数据库存储 - 仅使用廉价的对象存储（S3/OSS），是最低成本最高效率的通用同步方案
 
 ### 为什么选择 Flow Repo？
 
 与传统固定大小分块不同，CDC 根据数据内容而非固定位置确定块边界。这意味着在文件中间插入或删除数据时，只需重新同步受影响的数据块，而不是整个文件。Flow Repo 通过简洁的 FFI 接口，让 Dart/Flutter 生态能够使用这一强大的算法。
 
 **适用于**: 需要高效数据备份、多设备同步或最小带宽使用的云存储的 Flutter 应用。
+
+### 💰 零服务器成本架构
+
+**Flow Repo 无需服务器端计算和数据库存储** - 仅使用廉价的对象存储服务（S3/OSS）。这使其成为**最低成本最高效率的通用同步方案**：
+
+- **无需服务器**: 所有计算都在客户端完成
+- **无需数据库**: 元数据存储在对象存储本身中
+- **超低成本**: 只需支付对象存储费用（S3 通常为 $0.023/GB/月）
+- **通用兼容**: 支持任何 S3 兼容的存储提供商
+- **最高效率**: 直接访问对象存储，无中间层
 
 ---
 
@@ -192,41 +203,57 @@ cd ..
 
 ### 配置
 
-创建 `.env` 文件：
+复制 `.env.demo` 到 `.env` 并更新为实际值：
+
+```bash
+cp .env.demo .env
+# 然后编辑 .env 填入实际配置
+```
+
+`.env` 文件应包含：
 
 ```env
 # 加密密钥 (32 字节)
 AES_KEY=your_32_byte_aes_key_here_12345
 
-# 阿里云 OSS 配置（或 AWS S3）
-OSS_ACCESS_KEY_ID=your_access_key
-OSS_ACCESS_KEY_SECRET=your_secret_key
-OSS_BUCKET_NAME=your_bucket_name
-OSS_ENDPOINT=oss-cn-shenzhen.aliyuncs.com
-OSS_REGION=oss-cn-shenzhen
+# S3 兼容云存储（同步必需）
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+S3_BUCKET=your_bucket_name
+S3_ENDPOINT=s3.amazonaws.com
+S3_REGION=us-east-1
 ```
 
+**云存储兼容性**:
+- ✅ **AWS S3** - 完全支持，推荐使用
+- ✅ **七牛云** - 完全支持，推荐使用
+- ⚠️ **阿里云 OSS** - 支持但同步较慢（不支持 ListObjects，需要遍历所有对象）
+
+**注意**: 阿里云 OSS 缺少 ListObjects 支持，这意味着同步操作需要遍历所有对象，导致性能较慢。我们推荐使用 AWS S3 或七牛云以获得更好的性能。
+
 ### 简单用法
+
+**注意**: 所有路径（`data-path`、`repo-path`、`remote-path`）必须由用户指定。
 
 #### 创建索引
 
 ```bash
 # 创建快照索引
-dart run bin/main.dart index -d ./data --memo "Initial backup"
+dart run bin/main.dart index -d ./data -r ./.flow-repo -p remote/path --memo "Initial backup"
 ```
 
 #### 同步到云端
 
 ```bash
 # 同步到云端 (自动检测上传/下载方向)
-dart run bin/main.dart sync -d ./data
+dart run bin/main.dart sync -d ./data -r ./.flow-repo -p remote/path
 ```
 
 #### 同步到新设备
 
 ```bash
 # 同步到新设备 (使用不同的本地仓库路径)
-dart run bin/main.dart sync -d ./data-device2 -r ./.flow-repo-device2
+dart run bin/main.dart sync -d ./data-device2 -r ./.flow-repo-device2 -p remote/path
 ```
 
 ### 编程方式使用
@@ -247,11 +274,11 @@ void main() async {
   
   // 配置云存储（可选，仅同步时需要）
   final cloud = S3Cloud(
-    endpoint: 'https://your-bucket.oss-cn-shenzhen.aliyuncs.com',
-    accessKey: env['OSS_ACCESS_KEY_ID']!,
-    secretKey: env['OSS_ACCESS_KEY_SECRET']!,
-    bucket: env['OSS_BUCKET_NAME']!,
-    region: env['OSS_REGION']!,
+    endpoint: 'https://s3.amazonaws.com',
+    accessKey: env['AWS_ACCESS_KEY_ID']!,
+    secretKey: env['AWS_SECRET_ACCESS_KEY']!,
+    bucket: env['S3_BUCKET']!,
+    region: env['S3_REGION']!,
     availableSize: 100 * 1024 * 1024 * 1024, // 100GB
   );
   
@@ -264,6 +291,7 @@ void main() async {
     deviceOS: Platform.operatingSystem,
     aesKey: aesKey,
     cloud: cloud,
+    remotePath: 'remote/path', // 远程存储路径
   );
   
   // 创建索引
