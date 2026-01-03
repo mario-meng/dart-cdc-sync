@@ -1,5 +1,5 @@
-name: flow_repo
-description: A Dart implementation of dejavu - data snapshot and sync with chunking, deduplication, compression, and encryption.
+name: dart_cdc_sync
+description: Production-ready data snapshot and incremental sync system for Dart/Flutter with Content-Defined Chunking (CDC).
 version: 1.0.0
 environment:
   sdk: '>=3.0.0 <4.0.0'

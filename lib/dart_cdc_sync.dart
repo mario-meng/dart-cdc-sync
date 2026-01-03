@@ -1,4 +1,4 @@
-library flow_repo;
+library dart_cdc_sync;
 
 export 'entity/chunk.dart';
 export 'entity/file.dart';

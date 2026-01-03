@@ -274,7 +274,7 @@ dart run bin/main.dart sync -d ./data-device2 -r ./.flow-repo-device2 -p remote/
 ```dart
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flow_repo/flow_repo.dart';
+import 'package:dart_cdc_sync/dart_cdc_sync.dart';
 import 'package:dotenv/dotenv.dart';
 
 void main() async {
@@ -396,7 +396,7 @@ cd chunker-ffi
 #### 2. 在 Dart 中使用 CDC 分块
 
 ```dart
-import 'package:flow_repo/util/chunker_ffi.dart';
+import 'package:dart_cdc_sync/util/chunker_ffi.dart';
 
 // 创建 CDC 分块器
 final chunker = ChunkerFFI();
@@ -447,7 +447,7 @@ CDC 分块:
 #### Isolate 并发分块
 
 ```dart
-import 'package:flow_repo/util/chunker_optimized.dart';
+import 'package:dart_cdc_sync/util/chunker_optimized.dart';
 
 // 自动根据文件大小选择并发策略
 final chunks = await ChunkerOptimized.chunkFile('/path/to/large/file');

@@ -239,5 +239,5 @@ jobs:
 
 ## License
 
-This FFI wrapper is part of the Flow Repo project. The underlying chunker library is from [restic/chunker](https://github.com/restic/chunker).
+This FFI wrapper is part of the Dart CDC Sync project. The underlying chunker library is from [restic/chunker](https://github.com/restic/chunker).
 

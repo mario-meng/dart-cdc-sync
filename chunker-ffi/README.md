@@ -132,7 +132,7 @@ Returns the maximum chunk size (8MB).
 The Dart FFI bindings are located in `lib/util/chunker_ffi.dart`. Example:
 
 ```dart
-import 'package:flow_repo/util/chunker_ffi.dart';
+import 'package:dart_cdc_sync/util/chunker_ffi.dart';
 
 final chunker = ChunkerFFI();
 final handle = chunker.chunkerNew('/path/to/file');

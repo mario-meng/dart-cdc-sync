@@ -1,6 +1,6 @@
-# Contributing to Flow Repo
+# Contributing to Dart CDC Sync
 
-Thank you for your interest in contributing to Flow Repo! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to Dart CDC Sync! This document provides guidelines for contributing to the project.
 
 ## Development Setup
 
@@ -11,8 +11,8 @@ Thank you for your interest in contributing to Flow Repo! This document provides
 
 2. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd flow-repo
+   git clone git@github.com:mario-meng/dart-cdc-sync.git
+   cd dart-cdc-sync
    ```
 
 3. **Install dependencies**

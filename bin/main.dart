@@ -1,11 +1,11 @@
 // This script is for testing purposes only
-// Simple example demonstrating Flow Repo usage
+// Simple example demonstrating Dart CDC Sync usage
 
 import 'dart:io' as io;
 import 'dart:typed_data';
 import 'package:args/args.dart';
 import 'package:dotenv/dotenv.dart';
-import 'package:flow_repo/flow_repo.dart';
+import 'package:dart_cdc_sync/dart_cdc_sync.dart';
 
 void main(List<String> args) async {
   final parser = ArgParser()
@@ -27,7 +27,7 @@ void main(List<String> args) async {
   final results = parser.parse(args);
 
   if (results['help'] == true || results.command == null) {
-    print('Flow Repo - Test Script');
+    print('Dart CDC Sync - Test Script');
     print('NOTE: This script is for testing purposes only');
     print('');
     print('Usage:');
