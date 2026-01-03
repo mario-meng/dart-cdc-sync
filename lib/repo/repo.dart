@@ -20,6 +20,7 @@ class Repo {
   final String deviceOS;
   final Store store;
   final Cloud? cloud;
+  final String remotePath;
 
   Repo._({
     required this.dataPath,
@@ -29,6 +30,7 @@ class Repo {
     required this.deviceOS,
     required this.store,
     this.cloud,
+    this.remotePath = '',
   });
 
   /// 创建新的仓库
@@ -40,6 +42,7 @@ class Repo {
     required String deviceOS,
     required Uint8List aesKey,
     Cloud? cloud,
+    String remotePath = '',
   }) async {
     // 确保目录存在
     await io.Directory(repoPath).create(recursive: true);
@@ -66,7 +69,20 @@ class Repo {
       deviceOS: deviceOS,
       store: store,
       cloud: cloud,
+      remotePath: remotePath.isEmpty
+          ? ''
+          : remotePath.replaceAll(RegExp(r'^/+|/+$'), ''),
     );
+  }
+
+  /// Build cloud path with remote path prefix
+  String _cloudPath(String localPath) {
+    if (remotePath.isEmpty) {
+      return localPath;
+    }
+    // Remove leading slashes from localPath
+    final cleanLocal = localPath.replaceAll(RegExp(r'^/+'), '');
+    return '$remotePath/$cleanLocal';
   }
 
   /// 获取相对路径
@@ -358,11 +374,12 @@ class Repo {
     // 获取云端最新索引
     Index? cloudLatest;
     try {
-      final latestData = await cloud!.downloadObject('refs/latest');
+      final latestData = await cloud!.downloadObject(_cloudPath('refs/latest'));
       final cloudLatestID = String.fromCharCodes(latestData).trim();
 
       // 下载并解析云端索引
-      final indexData = await cloud!.downloadObject('indexes/$cloudLatestID');
+      final indexData =
+          await cloud!.downloadObject(_cloudPath('indexes/$cloudLatestID'));
 
       // 索引数据只压缩不加密
       try {
@@ -476,8 +493,8 @@ class Repo {
     await _uploadMissingObjects(localLatest, uploadStats);
 
     // 更新云端 latest 引用
-    await cloud!.uploadBytes(
-        'refs/latest', Uint8List.fromList(localLatest.id.codeUnits));
+    await cloud!.uploadBytes(_cloudPath('refs/latest'),
+        Uint8List.fromList(localLatest.id.codeUnits));
 
     return SyncResult(
       dataChanged:
@@ -527,7 +544,7 @@ class Repo {
     // 并发下载所有文件元数据
     final fileFutures = cloudIndex.files.map((fileID) async {
       final fileData = await cloud!.downloadObject(
-        'files/${fileID.substring(0, 2)}/${fileID.substring(2)}',
+        _cloudPath('files/${fileID.substring(0, 2)}/${fileID.substring(2)}'),
       );
       stats.downloadBytes += fileData.length;
       stats.downloadFileCount++;
@@ -559,7 +576,8 @@ class Repo {
         if (!await store.chunkExists(chunkID)) {
           chunkDownloadTasks.add(() async {
             final chunkData = await cloud!.downloadObject(
-              'objects/${chunkID.substring(0, 2)}/${chunkID.substring(2)}',
+              _cloudPath(
+                  'objects/${chunkID.substring(0, 2)}/${chunkID.substring(2)}'),
             );
             stats.downloadBytes += chunkData.length;
             stats.downloadChunkCount++;
@@ -631,7 +649,7 @@ class Repo {
     // 上传索引
     final indexData =
         await io.File(path.join(repoPath, 'indexes', index.id)).readAsBytes();
-    await cloud!.uploadBytes('indexes/${index.id}', indexData);
+    await cloud!.uploadBytes(_cloudPath('indexes/${index.id}'), indexData);
     stats.uploadBytes += indexData.length;
 
     // 获取所有文件
@@ -650,8 +668,9 @@ class Repo {
     final fileCheckFutures = files.map((file) async {
       final filePath =
           'files/${file.id.substring(0, 2)}/${file.id.substring(2)}';
-      final exists = await cloud!.objectExists(filePath);
-      return {'file': file, 'path': filePath, 'exists': exists};
+      final cloudFilePath = _cloudPath(filePath);
+      final exists = await cloud!.objectExists(cloudFilePath);
+      return {'file': file, 'path': cloudFilePath, 'exists': exists};
     }).toList();
 
     final fileResults = await Future.wait(fileCheckFutures);
@@ -680,7 +699,8 @@ class Repo {
       for (final chunkID in file.chunks) {
         allChunkPaths.add({
           'id': chunkID,
-          'path': 'objects/${chunkID.substring(0, 2)}/${chunkID.substring(2)}',
+          'path': _cloudPath(
+              'objects/${chunkID.substring(0, 2)}/${chunkID.substring(2)}'),
         });
       }
     }
@@ -772,11 +792,18 @@ class Repo {
     final objects = <String, bool>{};
 
     try {
-      // List with empty prefix to get all objects under repo/
-      final allObjects = await cloud!.listObjects('');
+      // List with remote path prefix to get all objects under the remote directory
+      final prefix = remotePath.isEmpty ? '' : remotePath;
+      final allObjects = await cloud!.listObjects(prefix);
 
       allObjects.forEach((key, value) {
-        objects[key] = true;
+        // Remove remote path prefix for local comparison
+        final localKey = remotePath.isEmpty
+            ? key
+            : key.startsWith('$remotePath/')
+                ? key.substring(remotePath.length + 1)
+                : key;
+        objects[localKey] = true;
       });
 
       print(
