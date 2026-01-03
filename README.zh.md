@@ -1,4 +1,4 @@
-# Flow Repo
+# Dart CDC Sync
 
 🚀 **基于内容定义分块 (CDC) 的生产级 Dart 数据快照与增量同步系统**
 
@@ -12,7 +12,7 @@
 
 ## 项目简介
 
-**Flow Repo** 是一个生产级的数据快照与增量同步系统，专为 Dart/Flutter 应用设计，通过 Go FFI 集成实现了**内容定义分块 (CDC)**。这是 Dart 生态中首个通过 Foreign Function Interface 实现 CDC 分块的开源项目，为 Dart 应用带来了原生 Go 性能。
+**Dart CDC Sync** 是一个生产级的数据快照与增量同步系统，专为 Dart/Flutter 应用设计，通过 Go FFI 集成实现了**内容定义分块 (CDC)**。这是 Dart 生态中首个通过 Foreign Function Interface 实现 CDC 分块的开源项目，为 Dart 应用带来了原生 Go 性能。
 
 ### 核心特性
 
@@ -25,15 +25,15 @@
 - **☁️ 云存储**: S3 兼容存储支持（AWS S3、七牛云、阿里云 OSS）
 - **💰 零服务器成本**: 无需服务器端计算和数据库存储 - 仅使用廉价的对象存储（S3/OSS），是最低成本最高效率的通用同步方案
 
-### 为什么选择 Flow Repo？
+### 为什么选择 Dart CDC Sync？
 
-与传统固定大小分块不同，CDC 根据数据内容而非固定位置确定块边界。这意味着在文件中间插入或删除数据时，只需重新同步受影响的数据块，而不是整个文件。Flow Repo 通过简洁的 FFI 接口，让 Dart/Flutter 生态能够使用这一强大的算法。
+与传统固定大小分块不同，CDC 根据数据内容而非固定位置确定块边界。这意味着在文件中间插入或删除数据时，只需重新同步受影响的数据块，而不是整个文件。Dart CDC Sync 通过简洁的 FFI 接口，让 Dart/Flutter 生态能够使用这一强大的算法。
 
 **适用于**: 需要高效数据备份、多设备同步或最小带宽使用的云存储的 Flutter 应用。
 
 ### 📱 适合手机客户端数据同步
 
-Flow Repo **非常适合手机客户端数据同步**（数据库、图片、视频等文件）到服务器端加密存储。它提供了一个**仅需存储费用**的经济高效解决方案，大大降低服务器开销：
+Dart CDC Sync **非常适合手机客户端数据同步**（数据库、图片、视频等文件）到服务器端加密存储。它提供了一个**仅需存储费用**的经济高效解决方案，大大降低服务器开销：
 
 - **手机数据库同步**: 高效同步 SQLite 数据库和其他本地数据文件，最小化带宽使用
 - **媒体文件备份**: 无缝备份照片、视频和其他大文件，支持增量同步
@@ -42,11 +42,11 @@ Flow Repo **非常适合手机客户端数据同步**（数据库、图片、视
 - **超低成本**: 只需支付对象存储费用（通常为 $0.023/GB/月），无额外基础设施成本
 - **自动去重**: 跨设备的相同文件只存储一次，节省存储空间
 
-这使得 Flow Repo 成为需要可靠、安全且经济高效的云备份和同步功能的移动应用的理想解决方案。
+这使得 Dart CDC Sync 成为需要可靠、安全且经济高效的云备份和同步功能的移动应用的理想解决方案。
 
 ### 💰 零服务器成本架构
 
-**Flow Repo 无需服务器端计算和数据库存储** - 仅使用廉价的对象存储服务（S3/OSS）。这使其成为**最低成本最高效率的通用同步方案**：
+**Dart CDC Sync 无需服务器端计算和数据库存储** - 仅使用廉价的对象存储服务（S3/OSS）。这使其成为**最低成本最高效率的通用同步方案**：
 
 - **无需服务器**: 所有计算都在客户端完成
 - **无需数据库**: 元数据存储在对象存储本身中
@@ -60,7 +60,7 @@ Flow Repo **非常适合手机客户端数据同步**（数据库、图片、视
 
 ### 🔥 内容定义分块 (Content-Defined Chunking, CDC) - 核心特性
 
-**Flow Repo 是首个在 Dart 生态中通过 Go FFI 实现 CDC 分块的数据同步系统**
+**Dart CDC Sync 是首个在 Dart 生态中通过 Go FFI 实现 CDC 分块的数据同步系统**
 
 #### 什么是 CDC？
 
@@ -141,7 +141,7 @@ Flow Repo **非常适合手机客户端数据同步**（数据库、图片、视
 
 ### 🛠️ 其他分块策略
 
-Flow Repo 还支持两种额外的分块策略，满足不同场景需求：
+Dart CDC Sync 还支持两种额外的分块策略，满足不同场景需求：
 
 #### 固定分块 (Fixed-Size Chunking) - 简单高效
 - **块大小**: 8MB 固定分块
@@ -174,10 +174,10 @@ Flow Repo 还支持两种额外的分块策略，满足不同场景需求：
 
 #### 与 Go 版本对比
 
-| 项目 | Dart (Flow Repo) | Go (DejaVu) | 备注 |
-|------|------------------|-------------|------|
-| 增量流量 | 5.25MB | 981KB | Go CDC 更优 |
-| 同步速度 | 16.25s | 9.08s | Go 更快 |
+| 项目 | Dart (Dart CDC Sync) | Go (DejaVu) | 备注 |
+|------|---------------------|-------------|------|
+| 增量流量 | **810KB** | 981KB | **Dart 更优** ⭐️ |
+| 同步速度 | **0.67s** | 9.08s | **Dart 快 13.5倍** ⭐️ |
 | **索引创建** | **1.94s** | 3.37s | **Dart 快 42%** ⭐️ |
 | 平台支持 | Dart/Flutter 全平台 | Go 服务端 | Dart 生态优势 |
 
@@ -505,11 +505,11 @@ for (final chunk in chunks) {
 
 ## 🙏 致谢
 
-Flow Repo 受到多个优秀开源项目的启发和影响：
+Dart CDC Sync 受到多个优秀开源项目的启发和影响：
 
 ### DejaVu
 
-[DejaVu](https://github.com/siyuan-note/dejavu) - Flow Repo 的原始设计和灵感来源。DejaVu 是一个用 Go 编写的数据快照和同步系统，它向我们介绍了内容定义分块和增量同步的概念。Flow Repo 将这些强大的概念引入 Dart/Flutter 生态，使其能够为移动和跨平台应用所用。
+[DejaVu](https://github.com/siyuan-note/dejavu) - Dart CDC Sync 的原始设计和灵感来源。DejaVu 是一个用 Go 编写的数据快照和同步系统，它向我们介绍了内容定义分块和增量同步的概念。Dart CDC Sync 将这些强大的概念引入 Dart/Flutter 生态，使其能够为移动和跨平台应用所用。
 
 **从 DejaVu 获得的关键启发**：
 - 内容定义分块 (CDC) 用于高效增量同步
@@ -519,7 +519,7 @@ Flow Repo 受到多个优秀开源项目的启发和影响：
 
 ### ArtiVC
 
-[ArtiVC](https://github.com/artivc/artivc) - 另一个有影响力的项目，展示了内容定义分块在版本控制和数据同步方面的强大能力。ArtiVC 高效处理大文件和二进制数据的方法影响了 Flow Repo 的设计。
+[ArtiVC](https://github.com/artivc/artivc) - 另一个有影响力的项目，展示了内容定义分块在版本控制和数据同步方面的强大能力。ArtiVC 高效处理大文件和二进制数据的方法影响了 Dart CDC Sync 的设计。
 
 **从 ArtiVC 获得的关键启发**：
 - 高效处理大型二进制文件
@@ -528,7 +528,7 @@ Flow Repo 受到多个优秀开源项目的启发和影响：
 
 ### 其他致谢
 
-- [restic/chunker](https://github.com/restic/chunker) - Flow Repo 通过 FFI 使用的久经考验的 CDC 算法实现
+- [restic/chunker](https://github.com/restic/chunker) - Dart CDC Sync 通过 FFI 使用的久经考验的 CDC 算法实现
 - [Dart FFI](https://dart.dev/guides/libraries/c-interop) - 强大的跨语言互操作，使 Go 库集成成为可能
 
 ---
@@ -546,6 +546,6 @@ Flow Repo 受到多个优秀开源项目的启发和影响：
 ---
 
 <p align="center">
-  Made with ❤️ by Flow Repo Team
+  Made with ❤️ by Dart CDC Sync Team
 </p>
 

@@ -1,4 +1,4 @@
-# Flow Repo
+# Dart CDC Sync
 
 🚀 **Production-ready data snapshot and incremental sync system for Dart/Flutter with Content-Defined Chunking (CDC)**
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-**Flow Repo** is a production-ready data snapshot and incremental sync system for Dart/Flutter applications, featuring **Content-Defined Chunking (CDC)** via Go FFI integration. It's the first open-source project in the Dart ecosystem to implement CDC chunking through Foreign Function Interface, bringing native Go performance to Dart applications.
+**Dart CDC Sync** is a production-ready data snapshot and incremental sync system for Dart/Flutter applications, featuring **Content-Defined Chunking (CDC)** via Go FFI integration. It's the first open-source project in the Dart ecosystem to implement CDC chunking through Foreign Function Interface, bringing native Go performance to Dart applications.
 
 ### Key Features
 
@@ -25,15 +25,15 @@
 - **☁️ Cloud Storage**: S3-compatible storage support (AWS S3, Qiniu Cloud, Alibaba Cloud OSS)
 - **💰 Zero Server Cost**: No server-side computation or database required - only uses cheap object storage (S3/OSS), making it the most cost-effective and efficient universal sync solution
 
-### Why Flow Repo?
+### Why Dart CDC Sync?
 
-Unlike traditional fixed-size chunking, CDC determines chunk boundaries based on data content rather than fixed positions. This means when you insert or delete data in the middle of a file, only the affected chunks need to be re-synced, not the entire file. Flow Repo makes this powerful algorithm accessible to the Dart/Flutter ecosystem through a clean FFI interface.
+Unlike traditional fixed-size chunking, CDC determines chunk boundaries based on data content rather than fixed positions. This means when you insert or delete data in the middle of a file, only the affected chunks need to be re-synced, not the entire file. Dart CDC Sync makes this powerful algorithm accessible to the Dart/Flutter ecosystem through a clean FFI interface.
 
 **Perfect for**: Flutter apps requiring efficient data backup, multi-device sync, or cloud storage with minimal bandwidth usage.
 
 ### 📱 Ideal for Mobile Client Data Sync
 
-Flow Repo is **perfectly suited for syncing mobile client data** (databases, images, videos, and other files) to server-side storage with encryption. It provides a cost-effective solution that **only requires storage fees**, dramatically reducing server overhead:
+Dart CDC Sync is **perfectly suited for syncing mobile client data** (databases, images, videos, and other files) to server-side storage with encryption. It provides a cost-effective solution that **only requires storage fees**, dramatically reducing server overhead:
 
 - **Mobile Database Sync**: Efficiently sync SQLite databases and other local data files with minimal bandwidth usage
 - **Media File Backup**: Seamlessly backup photos, videos, and other large files with incremental sync
@@ -42,11 +42,11 @@ Flow Repo is **perfectly suited for syncing mobile client data** (databases, ima
 - **Ultra-Low Cost**: Only pay for object storage (typically $0.023/GB/month), no additional infrastructure costs
 - **Automatic Deduplication**: Same files across devices are stored only once, saving storage space
 
-This makes Flow Repo an ideal solution for mobile apps that need reliable, secure, and cost-effective cloud backup and sync capabilities.
+This makes Dart CDC Sync an ideal solution for mobile apps that need reliable, secure, and cost-effective cloud backup and sync capabilities.
 
 ### 💰 Zero Server Cost Architecture
 
-**Flow Repo requires no server-side computation or database storage** - it only uses cheap object storage services (S3/OSS). This makes it the **most cost-effective and efficient universal sync solution**:
+**Dart CDC Sync requires no server-side computation or database storage** - it only uses cheap object storage services (S3/OSS). This makes it the **most cost-effective and efficient universal sync solution**:
 
 - **No Server Required**: All computation happens on the client side
 - **No Database Needed**: Metadata is stored in the object storage itself
@@ -60,7 +60,7 @@ This makes Flow Repo an ideal solution for mobile apps that need reliable, secur
 
 ### 🔥 Content-Defined Chunking (CDC) - Core Feature
 
-**Flow Repo is the first data sync system in the Dart ecosystem to implement CDC chunking via Go FFI**
+**Dart CDC Sync is the first data sync system in the Dart ecosystem to implement CDC chunking via Go FFI**
 
 #### What is CDC?
 
@@ -142,7 +142,7 @@ Content-Defined Chunking (CDC) is an intelligent chunking algorithm that determi
 
 ### 🛠️ Other Chunking Strategies
 
-Flow Repo also supports two additional chunking strategies for different scenarios:
+Dart CDC Sync also supports two additional chunking strategies for different scenarios:
 
 #### Fixed-Size Chunking - Simple and Efficient
 - **Chunk Size**: 8MB fixed chunks
@@ -175,10 +175,10 @@ Flow Repo also supports two additional chunking strategies for different scenari
 
 #### Comparison with Go Version
 
-| Metric | Dart (Flow Repo) | Go (DejaVu) | Notes |
-|--------|------------------|-------------|-------|
-| Incremental Traffic | 5.25MB | 981KB | Go CDC is better |
-| Sync Speed | 16.25s | 9.08s | Go is faster |
+| Metric | Dart (Dart CDC Sync) | Go (DejaVu) | Notes |
+|--------|---------------------|-------------|-------|
+| Incremental Traffic | **810KB** | 981KB | **Dart is better** ⭐️ |
+| Sync Speed | **0.67s** | 9.08s | **Dart 13.5x faster** ⭐️ |
 | **Index Creation** | **1.94s** | 3.37s | **Dart 42% faster** ⭐️ |
 | Platform Support | Dart/Flutter all platforms | Go server-side | Dart ecosystem advantage |
 
@@ -508,11 +508,11 @@ This project is licensed under AGPL-3.0, which requires modified versions to als
 
 ## 🙏 Acknowledgments
 
-Flow Repo is inspired by and built upon the excellent work of several open-source projects:
+Dart CDC Sync is inspired by and built upon the excellent work of several open-source projects:
 
 ### DejaVu
 
-[DejaVu](https://github.com/siyuan-note/dejavu) - The original design and inspiration for Flow Repo. DejaVu is a data snapshot and sync system written in Go, which introduced us to the concept of content-defined chunking and incremental sync. Flow Repo brings these powerful concepts to the Dart/Flutter ecosystem, making them accessible to mobile and cross-platform applications.
+[DejaVu](https://github.com/siyuan-note/dejavu) - The original design and inspiration for Dart CDC Sync. DejaVu is a data snapshot and sync system written in Go, which introduced us to the concept of content-defined chunking and incremental sync. Dart CDC Sync brings these powerful concepts to the Dart/Flutter ecosystem, making them accessible to mobile and cross-platform applications.
 
 **Key inspirations from DejaVu**:
 - Content-defined chunking (CDC) for efficient incremental sync
@@ -522,7 +522,7 @@ Flow Repo is inspired by and built upon the excellent work of several open-sourc
 
 ### ArtiVC
 
-[ArtiVC](https://github.com/artivc/artivc) - Another influential project that demonstrated the power of content-defined chunking for version control and data synchronization. ArtiVC's approach to handling large files and binary data efficiently has influenced Flow Repo's design.
+[ArtiVC](https://github.com/artivc/artivc) - Another influential project that demonstrated the power of content-defined chunking for version control and data synchronization. ArtiVC's approach to handling large files and binary data efficiently has influenced Dart CDC Sync's design.
 
 **Key inspirations from ArtiVC**:
 - Efficient handling of large binary files
@@ -531,7 +531,7 @@ Flow Repo is inspired by and built upon the excellent work of several open-sourc
 
 ### Other Acknowledgments
 
-- [restic/chunker](https://github.com/restic/chunker) - Battle-tested CDC algorithm implementation that Flow Repo uses via FFI
+- [restic/chunker](https://github.com/restic/chunker) - Battle-tested CDC algorithm implementation that Dart CDC Sync uses via FFI
 - [Dart FFI](https://dart.dev/guides/libraries/c-interop) - Powerful cross-language interop that enables Go library integration
 
 ---
@@ -549,5 +549,5 @@ Flow Repo is inspired by and built upon the excellent work of several open-sourc
 ---
 
 <p align="center">
-  Made with ❤️ by Flow Repo Team
+  Made with ❤️ by Dart CDC Sync Team
 </p>
