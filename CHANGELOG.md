@@ -1,14 +1,39 @@
 # Changelog
 
-All notable changes to Flow Repo will be documented in this file.
+All notable changes to Dart CDC Sync will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-04
+
+### Fixed
+- **Critical**: Fixed chunk path matching issue in cloud sync that caused all chunks to be treated as new
+  - Chunks are now correctly identified as existing when they match cloud storage
+  - Dramatically improved sync performance: from 16.25s to 0.67s (24x faster)
+  - Reduced incremental traffic: from 5.25MB to 810KB (84% reduction)
+- Fixed `dart:io` namespace conflict in `bin/main.dart` by using `import 'dart:io' as io`
+- Fixed hardcoded 'repo' prefix issue in S3Cloud, now properly uses remotePath parameter
+
+### Added
+- Added `.env.demo` template file for easy configuration setup
+- Enhanced error handling: script now checks for `.env` file and prompts user to copy from `.env.demo`
+
+### Changed
+- Renamed project from "Flow Repo" to "Dart CDC Sync"
+- Refactored `bin/main.dart` test script to use mandatory parameters (data-path, repo-path, remote-path)
+- Simplified test script based on `test_sync.dart` patterns
+- Refactored chunker_ffi to extract package root directory method
+
+### Performance
+- **Sync speed**: Improved from 16.25s to 0.67s (13.5x faster than Go version)
+- **Incremental traffic**: Reduced from 5.25MB to 810KB (better than Go version's 981KB)
+- **Index creation**: Maintained at 1.94s (42% faster than Go version)
+
 ## [1.0.0] - 2026-01-03
 
 ### Added
-- Initial release of Flow Repo
+- Initial release of Dart CDC Sync (formerly Flow Repo)
 - File chunking with SHA-1 hashing
 - Data compression using ZLib
 - AES-256-CBC encryption
@@ -26,9 +51,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Concurrent processing**: Batch upload/download with concurrency control
 
 ### Performance
-- Incremental sync: 98.08% bandwidth savings (5.25MB vs 273MB for 1-record database change)
-- Index creation: ~2s for 275MB dataset
-- Sync speed: 7-9s for incremental updates
+- Incremental sync: 99.7% bandwidth savings (810KB vs 273MB for 1-record database change)
+- Index creation: 1.94s for 275MB dataset
+- Sync speed: 0.67s for incremental updates
 - Data integrity: 100% accuracy
 
 ### Documentation
