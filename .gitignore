@@ -25,4 +25,13 @@ test_*.dart
 # macOS
 .DS_Store
 
-/.cursorrules
+# Native libraries (compiled binaries)
+lib/native/
+
+# Go build artifacts in chunker-ffi
+# chunker-ffi/*.h
+# chunker-ffi/*.dylib
+# chunker-ffi/*.so
+# chunker-ffi/*.dll
+
+.cursorrules
