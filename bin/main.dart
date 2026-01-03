@@ -96,64 +96,64 @@ void main(List<String> args) async {
 
   try {
     if (results.command!.name == 'index') {
-    final memo = results.command!['memo'] as String;
-    print('开始创建索引...');
-    print('数据目录: $dataPath');
-    print('仓库目录: $repoPath');
-    print('索引备注: $memo');
-    print('');
+      final memo = results.command!['memo'] as String;
+      print('开始创建索引...');
+      print('数据目录: $dataPath');
+      print('仓库目录: $repoPath');
+      print('索引备注: $memo');
+      print('');
 
-    try {
-      final startTime = DateTime.now();
-      final index = await repo.index(memo);
-      final duration = DateTime.now().difference(startTime);
+      try {
+        final startTime = DateTime.now();
+        final index = await repo.index(memo);
+        final duration = DateTime.now().difference(startTime);
 
-      print('索引创建成功!');
-      print('索引 ID: ${index.id}');
-      print('文件数量: ${index.count}');
-      print('总大小: ${_formatBytes(index.size)}');
-      print('创建时间: ${DateTime.fromMillisecondsSinceEpoch(index.created)}');
-      print('耗时: ${duration.inMilliseconds}ms');
-    } catch (e) {
-      print('错误: $e');
-      exit(1);
-    }
-  } else if (results.command!.name == 'sync') {
-    print('开始同步到云端...');
-    print('数据目录: $dataPath');
-    print('仓库目录: $repoPath');
-    print('');
-
-    try {
-      final totalStartTime = DateTime.now();
-
-      // 执行同步（sync 方法会自动处理）
-      final result = await repo.sync();
-
-      final totalDuration = DateTime.now().difference(totalStartTime);
-
-      print('\n同步完成!');
-      print('数据变更: ${result.dataChanged ? "是" : "否"}');
-      print(
-          '总耗时: ${totalDuration.inMilliseconds}ms (${(totalDuration.inMilliseconds / 1000).toStringAsFixed(2)}s)');
-
-      if (result.uploadBytes > 0) {
-        print('\n【上传统计】');
-        print('上传流量: ${_formatBytes(result.uploadBytes)}');
-        print('上传文件数: ${result.uploadFileCount}');
-        print('上传块数: ${result.uploadChunkCount}');
+        print('索引创建成功!');
+        print('索引 ID: ${index.id}');
+        print('文件数量: ${index.count}');
+        print('总大小: ${_formatBytes(index.size)}');
+        print('创建时间: ${DateTime.fromMillisecondsSinceEpoch(index.created)}');
+        print('耗时: ${duration.inMilliseconds}ms');
+      } catch (e) {
+        print('错误: $e');
+        exit(1);
       }
-      if (result.downloadBytes > 0) {
-        print('\n【下载统计】');
-        print('下载流量: ${_formatBytes(result.downloadBytes)}');
-        print('下载文件数: ${result.downloadFileCount}');
-        print('下载块数: ${result.downloadChunkCount}');
+    } else if (results.command!.name == 'sync') {
+      print('开始同步到云端...');
+      print('数据目录: $dataPath');
+      print('仓库目录: $repoPath');
+      print('');
+
+      try {
+        final totalStartTime = DateTime.now();
+
+        // 执行同步（sync 方法会自动处理）
+        final result = await repo.sync();
+
+        final totalDuration = DateTime.now().difference(totalStartTime);
+
+        print('\n同步完成!');
+        print('数据变更: ${result.dataChanged ? "是" : "否"}');
+        print(
+            '总耗时: ${totalDuration.inMilliseconds}ms (${(totalDuration.inMilliseconds / 1000).toStringAsFixed(2)}s)');
+
+        if (result.uploadBytes > 0) {
+          print('\n【上传统计】');
+          print('上传流量: ${_formatBytes(result.uploadBytes)}');
+          print('上传文件数: ${result.uploadFileCount}');
+          print('上传块数: ${result.uploadChunkCount}');
+        }
+        if (result.downloadBytes > 0) {
+          print('\n【下载统计】');
+          print('下载流量: ${_formatBytes(result.downloadBytes)}');
+          print('下载文件数: ${result.downloadFileCount}');
+          print('下载块数: ${result.downloadChunkCount}');
+        }
+      } catch (e) {
+        print('错误: $e');
+        exit(1);
       }
-    } catch (e) {
-      print('错误: $e');
-      exit(1);
     }
-  }
   } finally {
     // Clean up resources
     if (cloud != null && cloud is S3Cloud) {

@@ -129,7 +129,7 @@ class S3Cloud implements Cloud {
       final objects = <String, int>{};
       String? continuationToken;
       int pageCount = 0;
-      
+
       // 支持分页，获取所有对象
       do {
         pageCount++;
@@ -154,7 +154,7 @@ class S3Cloud implements Cloud {
         }
 
         continuationToken = response.nextContinuationToken;
-        
+
         // 如果还有更多页，继续获取
         if (continuationToken != null) {
           print('  已获取 ${objects.length} 个对象（第 $pageCount 页），继续获取...');

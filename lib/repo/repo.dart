@@ -404,7 +404,8 @@ class Repo {
         final missingFiles = await _checkLocalFiles(cloudLatest);
         if (missingFiles.isNotEmpty) {
           // Local files missing, restore from cloud
-          print('Local files missing (${missingFiles.length}), restoring from cloud');
+          print(
+              'Local files missing (${missingFiles.length}), restoring from cloud');
           return await _downloadFromCloud(cloudLatest);
         }
 
@@ -638,7 +639,7 @@ class Repo {
 
     // Concurrent object existence checking (OSS uses HeadObject)
     print('Checking cloud objects (concurrent HeadObject)...');
-    
+
     final uploadTasks = <Future<void> Function()>[];
     int newChunks = 0;
     int existingChunks = 0;
@@ -652,9 +653,9 @@ class Repo {
       final exists = await cloud!.objectExists(filePath);
       return {'file': file, 'path': filePath, 'exists': exists};
     }).toList();
-    
+
     final fileResults = await Future.wait(fileCheckFutures);
-    
+
     for (final result in fileResults) {
       if (!(result['exists'] as bool)) {
         newFiles++;
@@ -683,9 +684,9 @@ class Repo {
         });
       }
     }
-    
+
     print('Checking ${allChunkPaths.length} chunks...');
-    
+
     // 尝试使用 ListObjects 批量查询（最快）
     Map<String, bool>? cloudObjects;
     try {
@@ -695,7 +696,7 @@ class Repo {
     } catch (e) {
       print('批量查询失败，将使用 HeadObject 逐个检查: $e');
     }
-    
+
     if (cloudObjects != null && cloudObjects.isNotEmpty) {
       // 使用批量查询结果（非常快）
       for (final chunk in allChunkPaths) {
@@ -719,16 +720,16 @@ class Repo {
       // 降级方案：使用高并发 HeadObject
       const checkConcurrency = 50; // 检查并发数（HeadObject请求很轻量，可以高并发）
       print('使用并发 HeadObject 检查（并发度: $checkConcurrency）...');
-      
+
       for (int i = 0; i < allChunkPaths.length; i += checkConcurrency) {
         final batch = allChunkPaths.skip(i).take(checkConcurrency);
         final checkFutures = batch.map((chunk) async {
           final exists = await cloud!.objectExists(chunk['path']!);
           return {'chunk': chunk, 'exists': exists};
         }).toList();
-        
+
         final results = await Future.wait(checkFutures);
-        
+
         for (final result in results) {
           final chunk = result['chunk'] as Map<String, String>;
           if (!(result['exists'] as bool)) {
@@ -745,7 +746,7 @@ class Repo {
             existingChunks++;
           }
         }
-        
+
         // 进度提示（每50个显示一次）
         final current = i + batch.length;
         if (current % 50 == 0 || current == allChunkPaths.length) {
@@ -773,12 +774,13 @@ class Repo {
     try {
       // List with empty prefix to get all objects under repo/
       final allObjects = await cloud!.listObjects('');
-      
+
       allObjects.forEach((key, value) {
         objects[key] = true;
       });
-      
-      print('Cloud objects found: ${objects.length} (may be 0 if first sync or OSS returns NoSuchKey)');
+
+      print(
+          'Cloud objects found: ${objects.length} (may be 0 if first sync or OSS returns NoSuchKey)');
     } catch (e) {
       // Listing may fail, will check objects individually during upload
       // This is normal for first sync or when OSS returns NoSuchKey for empty results

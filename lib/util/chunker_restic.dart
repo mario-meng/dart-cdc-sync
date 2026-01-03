@@ -4,7 +4,7 @@ import 'hash.dart';
 import '../entity/chunk.dart';
 
 /// Restic-based chunker using FFI
-/// 
+///
 /// This uses the mature restic/chunker implementation via FFI
 /// for better incremental sync performance
 class ResticChunker {
@@ -26,15 +26,15 @@ class ResticChunker {
     }
 
     final chunks = <Chunk>[];
-    
+
     while (true) {
       final chunkData = _ffi.chunkerNext(_handle!);
       if (chunkData == null) break; // EOF
-      
+
       final chunkHash = hash(chunkData);
       chunks.add(Chunk(id: chunkHash, data: chunkData));
     }
-    
+
     return chunks;
   }
 
@@ -56,4 +56,3 @@ class ResticChunker {
     return ChunkerFFI().getMaxSize();
   }
 }
-
