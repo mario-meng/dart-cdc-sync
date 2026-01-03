@@ -31,6 +31,19 @@ Unlike traditional fixed-size chunking, CDC determines chunk boundaries based on
 
 **Perfect for**: Flutter apps requiring efficient data backup, multi-device sync, or cloud storage with minimal bandwidth usage.
 
+### 📱 Ideal for Mobile Client Data Sync
+
+Flow Repo is **perfectly suited for syncing mobile client data** (databases, images, videos, and other files) to server-side storage with encryption. It provides a cost-effective solution that **only requires storage fees**, dramatically reducing server overhead:
+
+- **Mobile Database Sync**: Efficiently sync SQLite databases and other local data files with minimal bandwidth usage
+- **Media File Backup**: Seamlessly backup photos, videos, and other large files with incremental sync
+- **Encrypted Storage**: All data is encrypted before upload, ensuring privacy and security
+- **Zero Server Overhead**: No server-side computation, no database maintenance, no API servers needed
+- **Ultra-Low Cost**: Only pay for object storage (typically $0.023/GB/month), no additional infrastructure costs
+- **Automatic Deduplication**: Same files across devices are stored only once, saving storage space
+
+This makes Flow Repo an ideal solution for mobile apps that need reliable, secure, and cost-effective cloud backup and sync capabilities.
+
 ### 💰 Zero Server Cost Architecture
 
 **Flow Repo requires no server-side computation or database storage** - it only uses cheap object storage services (S3/OSS). This makes it the **most cost-effective and efficient universal sync solution**:
@@ -495,9 +508,31 @@ This project is licensed under AGPL-3.0, which requires modified versions to als
 
 ## 🙏 Acknowledgments
 
-- [DejaVu](https://github.com/siyuan-note/dejavu) - Original design and inspiration
-- [restic/chunker](https://github.com/restic/chunker) - Battle-tested CDC algorithm
-- [Dart FFI](https://dart.dev/guides/libraries/c-interop) - Powerful cross-language interop
+Flow Repo is inspired by and built upon the excellent work of several open-source projects:
+
+### DejaVu
+
+[DejaVu](https://github.com/siyuan-note/dejavu) - The original design and inspiration for Flow Repo. DejaVu is a data snapshot and sync system written in Go, which introduced us to the concept of content-defined chunking and incremental sync. Flow Repo brings these powerful concepts to the Dart/Flutter ecosystem, making them accessible to mobile and cross-platform applications.
+
+**Key inspirations from DejaVu**:
+- Content-defined chunking (CDC) for efficient incremental sync
+- Snapshot-based versioning system
+- Content-addressable storage architecture
+- Zero-knowledge encryption approach
+
+### ArtiVC
+
+[ArtiVC](https://github.com/artivc/artivc) - Another influential project that demonstrated the power of content-defined chunking for version control and data synchronization. ArtiVC's approach to handling large files and binary data efficiently has influenced Flow Repo's design.
+
+**Key inspirations from ArtiVC**:
+- Efficient handling of large binary files
+- Content-based deduplication strategies
+- Minimal metadata overhead
+
+### Other Acknowledgments
+
+- [restic/chunker](https://github.com/restic/chunker) - Battle-tested CDC algorithm implementation that Flow Repo uses via FFI
+- [Dart FFI](https://dart.dev/guides/libraries/c-interop) - Powerful cross-language interop that enables Go library integration
 
 ---
 
