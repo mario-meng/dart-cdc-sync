@@ -719,8 +719,28 @@ class Repo {
 
     if (cloudObjects != null && cloudObjects.isNotEmpty) {
       // 使用批量查询结果（非常快）
+      // Note: cloudObjects keys are without remotePath prefix, so we need to extract relative path
       for (final chunk in allChunkPaths) {
-        final exists = cloudObjects.containsKey(chunk['path']!);
+        // Extract relative path from full cloud path (remove remotePath prefix)
+        final fullPath = chunk['path']!;
+        String relativePath;
+        if (remotePath.isEmpty) {
+          relativePath = fullPath;
+        } else {
+          // Remove remotePath prefix from fullPath
+          final prefixWithSlash = remotePath.endsWith('/') ? remotePath : '$remotePath/';
+          if (fullPath.startsWith(prefixWithSlash)) {
+            relativePath = fullPath.substring(prefixWithSlash.length);
+          } else if (fullPath.startsWith(remotePath)) {
+            relativePath = fullPath.substring(remotePath.length);
+            if (relativePath.startsWith('/')) {
+              relativePath = relativePath.substring(1);
+            }
+          } else {
+            relativePath = fullPath;
+          }
+        }
+        final exists = cloudObjects.containsKey(relativePath);
         if (!exists) {
           newChunks++;
           uploadTasks.add(() async {
