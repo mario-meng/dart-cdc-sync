@@ -1,3 +1,6 @@
+// This script is for testing purposes only
+// Simple example demonstrating Flow Repo usage
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:args/args.dart';
@@ -6,76 +9,100 @@ import 'package:flow_repo/flow_repo.dart';
 
 void main(List<String> args) async {
   final parser = ArgParser()
-    ..addOption('data-path', abbr: 'd', defaultsTo: './data-0', help: '数据目录路径')
+    ..addOption('data-path',
+        abbr: 'd', mandatory: true, help: 'Data directory path')
     ..addOption('repo-path',
-        abbr: 'r', defaultsTo: './.flow-repo', help: '仓库目录路径')
-    ..addFlag('help', abbr: 'h', negatable: false, help: '显示帮助信息')
+        abbr: 'r', mandatory: true, help: 'Local repository path')
+    ..addOption('remote-path',
+        abbr: 'p', mandatory: true, help: 'Remote server storage path')
+    ..addFlag('help',
+        abbr: 'h', negatable: false, help: 'Show help information')
     ..addCommand(
         'index',
         ArgParser()
           ..addOption('memo',
-              abbr: 'm', defaultsTo: '[Auto] Index', help: '索引备注'))
+              abbr: 'm', defaultsTo: '[Auto] Index', help: 'Index memo'))
     ..addCommand('sync', ArgParser());
 
   final results = parser.parse(args);
 
   if (results['help'] == true || results.command == null) {
-    print('Flow Repo - 数据快照和同步工具');
+    print('Flow Repo - Test Script');
+    print('NOTE: This script is for testing purposes only');
     print('');
-    print('用法:');
+    print('Usage:');
     print('  dart run bin/main.dart <command> [options]');
     print('');
-    print('命令:');
-    print('  index    创建数据索引');
-    print('  sync     同步到云端');
+    print('Commands:');
+    print('  index    Create data index');
+    print('  sync     Sync to cloud');
     print('');
-    print('选项:');
+    print('Options:');
     print(parser.usage);
     exit(0);
   }
 
-  // 加载环境变量
+  // Load environment variables from .env file
   final env = DotEnv(includePlatformEnvironment: true)..load(['.env']);
 
-  // 获取配置
-  final dataPath = results['data-path'] as String;
-  final repoPath = results['repo-path'] as String;
+  // Get configuration from command line
+  final dataPath = _expandPath(results['data-path'] as String);
+  final repoPath = _expandPath(results['repo-path'] as String);
+  final remotePath = results['remote-path'] as String;
 
-  // AES 密钥（32字节）
-  final aesKeyStr = env['AES_KEY'] ?? '12345678901234567890123456789012';
+  // AES key (32 bytes) - must be provided via environment
+  final aesKeyStr = env['AES_KEY'];
+  if (aesKeyStr == null || aesKeyStr.isEmpty) {
+    print('Error: AES_KEY not found in .env file');
+    exit(1);
+  }
   final aesKey = Uint8List.fromList(aesKeyStr.codeUnits.take(32).toList());
 
-  // 创建仓库
+  // Create repository
   Cloud? cloud;
   if (results.command!.name == 'sync') {
-    // 配置 S3 云存储
-    final accessKey = env['OSS_ACCESS_KEY_ID'] ?? '';
-    final secretKey = env['OSS_ACCESS_KEY_SECRET'] ?? '';
-    final bucket = env['OSS_BUCKET_NAME'] ?? '';
-    final endpoint = env['OSS_ENDPOINT'] ?? '';
-    final region = env['OSS_REGION'] ?? 'oss-cn-shenzhen';
+    // Configure S3 cloud storage - all values from .env
+    final accessKey = env['AWS_ACCESS_KEY_ID'];
+    final secretKey = env['AWS_SECRET_ACCESS_KEY'];
+    final bucket = env['S3_BUCKET'];
+    final endpoint = env['S3_ENDPOINT'];
+    final region = env['S3_REGION'];
 
-    if (accessKey.isEmpty ||
-        secretKey.isEmpty ||
-        bucket.isEmpty ||
-        endpoint.isEmpty) {
-      print('错误: 同步需要配置 OSS 环境变量');
-      print('请设置以下环境变量:');
-      print('  OSS_ACCESS_KEY_ID');
-      print('  OSS_ACCESS_KEY_SECRET');
-      print('  OSS_BUCKET_NAME');
-      print('  OSS_ENDPOINT');
+    // Validate required environment variables
+    if (accessKey == null || accessKey.isEmpty) {
+      print('Error: AWS_ACCESS_KEY_ID not found in .env file');
+      exit(1);
+    }
+    if (secretKey == null || secretKey.isEmpty) {
+      print('Error: AWS_SECRET_ACCESS_KEY not found in .env file');
+      exit(1);
+    }
+    if (bucket == null || bucket.isEmpty) {
+      print('Error: S3_BUCKET not found in .env file');
+      exit(1);
+    }
+    if (endpoint == null || endpoint.isEmpty) {
+      print('Error: S3_ENDPOINT not found in .env file');
+      exit(1);
+    }
+    if (region == null || region.isEmpty) {
+      print('Error: S3_REGION not found in .env file');
       exit(1);
     }
 
-    // 阿里云 OSS 需要使用虚拟主机样式的 endpoint
-    // 格式：https://bucket.endpoint
-    final ossEndpoint = endpoint.contains('aliyuncs.com')
-        ? 'https://$bucket.$endpoint'
-        : (endpoint.startsWith('http') ? endpoint : 'https://$endpoint');
+    print('Using cloud storage configuration:');
+    print('  Bucket: $bucket');
+    print('  Endpoint: $endpoint');
+    print('  Region: $region');
+    print('  Remote Path: $remotePath');
+    print('');
+
+    // Use path-style for standard S3
+    final s3Endpoint =
+        endpoint.startsWith('http') ? endpoint : 'https://$endpoint';
 
     cloud = S3Cloud(
-      endpoint: ossEndpoint,
+      endpoint: s3Endpoint,
       accessKey: accessKey,
       secretKey: secretKey,
       bucket: bucket,
@@ -88,19 +115,21 @@ void main(List<String> args) async {
     dataPath: dataPath,
     repoPath: repoPath,
     deviceID: 'device-001',
-    deviceName: 'My Device',
+    deviceName: 'Test Device',
     deviceOS: Platform.operatingSystem,
     aesKey: aesKey,
     cloud: cloud,
+    remotePath: remotePath,
   );
 
   try {
     if (results.command!.name == 'index') {
       final memo = results.command!['memo'] as String;
-      print('开始创建索引...');
-      print('数据目录: $dataPath');
-      print('仓库目录: $repoPath');
-      print('索引备注: $memo');
+      print('Starting to create index...');
+      print('Data directory: $dataPath');
+      print('Repository directory: $repoPath');
+      print('Remote path: $remotePath');
+      print('Index memo: $memo');
       print('');
 
       try {
@@ -108,49 +137,51 @@ void main(List<String> args) async {
         final index = await repo.index(memo);
         final duration = DateTime.now().difference(startTime);
 
-        print('索引创建成功!');
-        print('索引 ID: ${index.id}');
-        print('文件数量: ${index.count}');
-        print('总大小: ${_formatBytes(index.size)}');
-        print('创建时间: ${DateTime.fromMillisecondsSinceEpoch(index.created)}');
-        print('耗时: ${duration.inMilliseconds}ms');
+        print('Index created successfully!');
+        print('Index ID: ${index.id}');
+        print('File count: ${index.count}');
+        print('Total size: ${_formatBytes(index.size)}');
+        print(
+            'Created at: ${DateTime.fromMillisecondsSinceEpoch(index.created)}');
+        print('Duration: ${duration.inMilliseconds}ms');
       } catch (e) {
-        print('错误: $e');
+        print('Error: $e');
         exit(1);
       }
     } else if (results.command!.name == 'sync') {
-      print('开始同步到云端...');
-      print('数据目录: $dataPath');
-      print('仓库目录: $repoPath');
+      print('Starting to sync to cloud...');
+      print('Data directory: $dataPath');
+      print('Repository directory: $repoPath');
+      print('Remote path: $remotePath');
       print('');
 
       try {
         final totalStartTime = DateTime.now();
 
-        // 执行同步（sync 方法会自动处理）
+        // Execute sync (sync method handles automatically)
         final result = await repo.sync();
 
         final totalDuration = DateTime.now().difference(totalStartTime);
 
-        print('\n同步完成!');
-        print('数据变更: ${result.dataChanged ? "是" : "否"}');
+        print('\nSync completed!');
+        print('Data changed: ${result.dataChanged ? "Yes" : "No"}');
         print(
-            '总耗时: ${totalDuration.inMilliseconds}ms (${(totalDuration.inMilliseconds / 1000).toStringAsFixed(2)}s)');
+            'Total duration: ${totalDuration.inMilliseconds}ms (${(totalDuration.inMilliseconds / 1000).toStringAsFixed(2)}s)');
 
         if (result.uploadBytes > 0) {
-          print('\n【上传统计】');
-          print('上传流量: ${_formatBytes(result.uploadBytes)}');
-          print('上传文件数: ${result.uploadFileCount}');
-          print('上传块数: ${result.uploadChunkCount}');
+          print('\n[Upload Statistics]');
+          print('Upload traffic: ${_formatBytes(result.uploadBytes)}');
+          print('Upload file count: ${result.uploadFileCount}');
+          print('Upload chunk count: ${result.uploadChunkCount}');
         }
         if (result.downloadBytes > 0) {
-          print('\n【下载统计】');
-          print('下载流量: ${_formatBytes(result.downloadBytes)}');
-          print('下载文件数: ${result.downloadFileCount}');
-          print('下载块数: ${result.downloadChunkCount}');
+          print('\n[Download Statistics]');
+          print('Download traffic: ${_formatBytes(result.downloadBytes)}');
+          print('Download file count: ${result.downloadFileCount}');
+          print('Download chunk count: ${result.downloadChunkCount}');
         }
       } catch (e) {
-        print('错误: $e');
+        print('Error: $e');
         exit(1);
       }
     }
@@ -162,6 +193,7 @@ void main(List<String> args) async {
   }
 }
 
+/// Format bytes to human-readable string
 String _formatBytes(int bytes) {
   if (bytes < 1024) return '${bytes}B';
   if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(2)}KB';
@@ -169,4 +201,16 @@ String _formatBytes(int bytes) {
     return '${(bytes / (1024 * 1024)).toStringAsFixed(2)}MB';
   }
   return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)}GB';
+}
+
+/// Expand tilde (~) in path to user home directory
+String _expandPath(String path) {
+  if (path.startsWith('~/')) {
+    final home =
+        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+    if (home != null) {
+      return path.replaceFirst('~', home);
+    }
+  }
+  return path;
 }
