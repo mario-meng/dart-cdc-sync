@@ -1,7 +1,7 @@
 // This script is for testing purposes only
 // Simple example demonstrating Flow Repo usage
 
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:typed_data';
 import 'package:args/args.dart';
 import 'package:dotenv/dotenv.dart';
@@ -39,17 +39,17 @@ void main(List<String> args) async {
     print('');
     print('Options:');
     print(parser.usage);
-    exit(0);
+    io.exit(0);
   }
 
   // Load environment variables from .env file
-  final envFile = File('.env');
+  final envFile = io.File('.env');
   if (!await envFile.exists()) {
     print('Error: .env file not found');
     print('Please copy .env.demo to .env and update with your configuration:');
     print('  cp .env.demo .env');
     print('  # Then edit .env with your actual values');
-    exit(1);
+    io.exit(1);
   }
   final env = DotEnv(includePlatformEnvironment: true)..load(['.env']);
 
@@ -62,7 +62,7 @@ void main(List<String> args) async {
   final aesKeyStr = env['AES_KEY'];
   if (aesKeyStr == null || aesKeyStr.isEmpty) {
     print('Error: AES_KEY not found in .env file');
-    exit(1);
+    io.exit(1);
   }
   final aesKey = Uint8List.fromList(aesKeyStr.codeUnits.take(32).toList());
 
@@ -79,23 +79,23 @@ void main(List<String> args) async {
     // Validate required environment variables
     if (accessKey == null || accessKey.isEmpty) {
       print('Error: AWS_ACCESS_KEY_ID not found in .env file');
-      exit(1);
+      io.exit(1);
     }
     if (secretKey == null || secretKey.isEmpty) {
       print('Error: AWS_SECRET_ACCESS_KEY not found in .env file');
-      exit(1);
+      io.exit(1);
     }
     if (bucket == null || bucket.isEmpty) {
       print('Error: S3_BUCKET not found in .env file');
-      exit(1);
+      io.exit(1);
     }
     if (endpoint == null || endpoint.isEmpty) {
       print('Error: S3_ENDPOINT not found in .env file');
-      exit(1);
+      io.exit(1);
     }
     if (region == null || region.isEmpty) {
       print('Error: S3_REGION not found in .env file');
-      exit(1);
+      io.exit(1);
     }
 
     print('Using cloud storage configuration:');
@@ -124,7 +124,7 @@ void main(List<String> args) async {
     repoPath: repoPath,
     deviceID: 'device-001',
     deviceName: 'Test Device',
-    deviceOS: Platform.operatingSystem,
+    deviceOS: io.Platform.operatingSystem,
     aesKey: aesKey,
     cloud: cloud,
     remotePath: remotePath,
@@ -154,7 +154,7 @@ void main(List<String> args) async {
         print('Duration: ${duration.inMilliseconds}ms');
       } catch (e) {
         print('Error: $e');
-        exit(1);
+        io.exit(1);
       }
     } else if (results.command!.name == 'sync') {
       print('Starting to sync to cloud...');
@@ -190,7 +190,7 @@ void main(List<String> args) async {
         }
       } catch (e) {
         print('Error: $e');
-        exit(1);
+        io.exit(1);
       }
     }
   } finally {
@@ -215,7 +215,7 @@ String _formatBytes(int bytes) {
 String _expandPath(String path) {
   if (path.startsWith('~/')) {
     final home =
-        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
+        io.Platform.environment['HOME'] ?? io.Platform.environment['USERPROFILE'];
     if (home != null) {
       return path.replaceFirst('~', home);
     }
